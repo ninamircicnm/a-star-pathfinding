@@ -48,3 +48,64 @@ class GraphPlannerApp:
         frame.pack(pady=5)
 
         self.canvas.bind("<Button-1>", self.on_canvas_click)
+    
+    def on_canvas_click(self, event):
+        clicked = self.find_node(event.x, event.y)
+
+        if clicked:
+            if self.selected_node is None:
+                self.selected_node = clicked
+                self.highlight_node(clicked, "yellow")
+            else:
+                if clicked != self.selected_node:
+                    cost = simpledialog.askfloat("Edge Cost", f"Cost {self.selected_node} → {clicked}:", minvalue=0)
+                    if cost is not None:
+                        updated = False
+                        for i, (node, old_cost) in enumerate(self.graph.get(self.selected_node, [])):
+                            if node == clicked:
+                                self.graph[self.selected_node][i] = (clicked, cost)
+                                updated = True
+                                break
+                        if not updated:
+                            self.graph.setdefault(self.selected_node, []).append((clicked, cost))
+
+                        x1, y1 = self.nodes[self.selected_node]
+                        x2, y2 = self.nodes[clicked]
+                        mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
+
+                        items = self.canvas.find_overlapping(mid_x - 10, mid_y - 10, mid_x + 10, mid_y + 10)
+                        for item in items:
+                            if self.canvas.type(item) == "text":
+                                self.canvas.delete(item)
+
+                        self.canvas.create_line(x1, y1, x2, y2, fill="gray", width=2.5)
+                        self.canvas.create_text(mid_x, mid_y, text=str(cost), fill="black")
+
+                if self.selected_node == self.start_node:
+                    self.highlight_node(self.selected_node, "purple")
+                elif self.selected_node == self.goal_node:
+                    self.highlight_node(self.selected_node, "green")
+                else:
+                    self.highlight_node(self.selected_node, "lightblue")
+
+                self.selected_node = None
+        else:
+            name = f"N{self.node_counter}"
+            self.node_counter += 1
+            self.nodes[name] = (event.x, event.y)
+            self.graph.setdefault(name, [])
+            self.canvas.create_oval(event.x - 15, event.y - 15, event.x + 15, event.y + 15, fill="lightblue", outline="black")
+            self.canvas.create_text(event.x, event.y, text=name)
+    
+     # Helper functions for drawing on canvas
+
+    def find_node(self, x, y):
+        for name, (nx, ny) in self.nodes.items():
+            if (x - nx)**2 + (y - ny)**2 <= 20**2:
+                return name
+        return None
+
+    def highlight_node(self, name, color):
+        x, y = self.nodes[name]
+        self.canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill=color, outline="black")
+        self.canvas.create_text(x, y, text=name)
