@@ -51,6 +51,7 @@ class GraphPlannerApp:
         tk.Button(frame, text="Set Start", command=self.set_start_node).pack(side=tk.LEFT, padx=5)
         tk.Button(frame, text="Set Goal", command=self.set_goal_node).pack(side=tk.LEFT, padx=5)
         tk.Button(frame, text="Add Heuristics", command=self.add_heuristics).pack(side=tk.LEFT, padx=5)
+        tk.Button(frame, text="Run A*", command=self.run_astar).pack(side=tk.LEFT, padx=5)
 
         self.canvas.bind("<Button-1>", self.on_canvas_click)
     
@@ -168,3 +169,17 @@ class GraphPlannerApp:
             win.destroy()
 
         tk.Button(win, text="Save", command=save_heuristics).grid(row=len(self.nodes) + 1, column=0, columnspan=2, pady=8)
+    
+    def run_astar(self):
+        if not (self.start_node and self.goal_node):
+            messagebox.showwarning("Warning", "Please set start and goal state!")
+            return
+        path, cost = astar(self.graph, self.heuristic, self.start_node, self.goal_node)
+        if path is None:
+            messagebox.showinfo("Search Result", "No path found.")
+        else:
+            messagebox.showinfo("Search Result", f"Path: {' -> '.join(path)}\nTotal cost: {cost}")
+            for i in range(len(path) - 1):
+                x1, y1 = self.nodes[path[i]]
+                x2, y2 = self.nodes[path[i + 1]]
+                self.canvas.create_line(x1, y1, x2, y2, fill="green", width=3.5)
