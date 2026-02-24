@@ -52,6 +52,7 @@ class GraphPlannerApp:
         tk.Button(frame, text="Set Goal", command=self.set_goal_node).pack(side=tk.LEFT, padx=5)
         tk.Button(frame, text="Add Heuristics", command=self.add_heuristics).pack(side=tk.LEFT, padx=5)
         tk.Button(frame, text="Run A*", command=self.run_astar).pack(side=tk.LEFT, padx=5)
+        tk.Button(frame, text="Reset Board", command=self.reset_board).pack(side=tk.LEFT, padx=5)
 
         self.canvas.bind("<Button-1>", self.on_canvas_click)
     
@@ -183,3 +184,29 @@ class GraphPlannerApp:
                 x1, y1 = self.nodes[path[i]]
                 x2, y2 = self.nodes[path[i + 1]]
                 self.canvas.create_line(x1, y1, x2, y2, fill="green", width=3.5)
+    
+    def show_instructions(self):
+        messagebox.showinfo("How to use",
+        "1. Click anywhere on the board to add a new state.\n"
+        "2. Click one state then another to create an edge and enter the cost.\n"
+        "3. Set start and goal state using the buttons. Hint: start is purple, goal is green.\n"
+        "4. Add heuristics for each node, otherwise cost defaults to 1.0.\n"
+        "5. Run the A* algorithm to find the optimal path.\n"
+        "6. The optimal path will be highlighted in green on the graph.\n\n")
+
+    def reset_board(self):
+        self.canvas.delete("all")
+        self.nodes.clear()
+        self.graph.clear()
+        self.heuristic.clear()
+        self.heuristic_texts.clear()
+        self.node_counter = 0
+        self.start_node = None
+        self.goal_node = None
+        self.selected_node = None
+
+# Run application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = GraphPlannerApp(root)
+    root.mainloop()
