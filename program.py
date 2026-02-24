@@ -50,6 +50,7 @@ class GraphPlannerApp:
         tk.Button(frame, text="Instructions", command=self.show_instructions).pack(side=tk.LEFT, padx=5)
         tk.Button(frame, text="Set Start", command=self.set_start_node).pack(side=tk.LEFT, padx=5)
         tk.Button(frame, text="Set Goal", command=self.set_goal_node).pack(side=tk.LEFT, padx=5)
+        tk.Button(frame, text="Add Heuristics", command=self.add_heuristics).pack(side=tk.LEFT, padx=5)
 
         self.canvas.bind("<Button-1>", self.on_canvas_click)
     
@@ -129,3 +130,41 @@ class GraphPlannerApp:
             self.highlight_node(name, "green")
         else:
             messagebox.showerror("Error", "State does not exist!")
+    
+    def add_heuristics(self):
+        if not self.nodes:
+            messagebox.showwarning("Warning", "Add states to the board first!")
+            return
+
+        win = tk.Toplevel(self.root)
+        win.title("Heuristics")
+
+        tk.Label(win, text="Enter heuristic value for each node:").grid(row=0, column=0, columnspan=2, pady=5)
+
+        entries = {}
+
+        for i, name in enumerate(self.nodes.keys(), start=1):
+            tk.Label(win, text=name).grid(row=i, column=0, padx=5, pady=2, sticky="e")
+            e = tk.Entry(win, width=8)
+            e.grid(row=i, column=1, padx=5, pady=2)
+            if name in self.heuristic:
+                e.insert(0, str(self.heuristic[name]))
+            entries[name] = e
+
+        def save_heuristics():
+            for n, e in entries.items():
+                try:
+                    self.heuristic[n] = float(e.get())
+                except ValueError:
+                    self.heuristic[n] = 1.0
+                x, y = self.nodes[n]
+                text = f"h={self.heuristic[n]}"
+
+                if n in self.heuristic_texts:
+                    self.canvas.delete(self.heuristic_texts[n])
+
+                self.heuristic_texts[n] = self.canvas.create_text(x + 25, y - 10, text=text, fill="darkblue", font=("Arial", 9, "italic"))
+
+            win.destroy()
+
+        tk.Button(win, text="Save", command=save_heuristics).grid(row=len(self.nodes) + 1, column=0, columnspan=2, pady=8)
