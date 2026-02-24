@@ -47,6 +47,10 @@ class GraphPlannerApp:
         frame = tk.Frame(root)
         frame.pack(pady=5)
 
+        tk.Button(frame, text="Instructions", command=self.show_instructions).pack(side=tk.LEFT, padx=5)
+        tk.Button(frame, text="Set Start", command=self.set_start_node).pack(side=tk.LEFT, padx=5)
+        tk.Button(frame, text="Set Goal", command=self.set_goal_node).pack(side=tk.LEFT, padx=5)
+
         self.canvas.bind("<Button-1>", self.on_canvas_click)
     
     def on_canvas_click(self, event):
@@ -109,3 +113,19 @@ class GraphPlannerApp:
         x, y = self.nodes[name]
         self.canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill=color, outline="black")
         self.canvas.create_text(x, y, text=name)
+    
+    def set_start_node(self):
+        name = simpledialog.askstring("Start State", "Enter start state name (e.g. N0):")
+        if name in self.nodes:
+            self.start_node = name
+            self.highlight_node(name, "purple")
+        else:
+            messagebox.showerror("Error", "State does not exist!")
+
+    def set_goal_node(self):
+        name = simpledialog.askstring("Goal State", "Enter goal state name (e.g. N7):")
+        if name in self.nodes:
+            self.goal_node = name
+            self.highlight_node(name, "green")
+        else:
+            messagebox.showerror("Error", "State does not exist!")
